@@ -1,29 +1,12 @@
 import { useRouter } from "next/router";
-import { getFilteredEvents } from "../../dummy-data";
+import { getFilteredEvents } from "../../helpers/api-utils";
 import EventList from "../../components/events/event-list";
 import ResultsTitle from "../../components/results-title/results-title";
 import Button from "../../components/ui/button";
 import ErrorAlert from "../../components/ui/error-alert/error-alert";
 
-function FilteredEventsPage() {
-  const router = useRouter();
-  const filteredData = router.query.slug;
-
-  if (!filteredData) {
-    return <h5>Loading...</h5>;
-  }
-
-  const numYear = +filteredData[0];
-  const numMonth = +filteredData[1];
-
-  if (
-    isNaN(numYear) ||
-    isNaN(numMonth) ||
-    numYear > 2030 ||
-    numYear < 2019 ||
-    numMonth < 1 ||
-    numMonth > 12
-  ) {
+function FilteredEventsPage(props) {
+  if (props.hasError) {
     return (
       <>
         <ErrorAlert>
@@ -36,7 +19,7 @@ function FilteredEventsPage() {
     );
   }
 
-  const filteredEvents = getFilteredEvents({ year: numYear, month: numMonth });
+  const filteredEvents = props.events;
 
   if (!filteredEvents || filteredEvents.length == 0) {
     return (
@@ -51,6 +34,9 @@ function FilteredEventsPage() {
     );
   }
 
+  const numYear = props.date.year;
+  const numMonth = props.date.month;
+
   const filteredDateObject = new Date(numYear, numMonth - 1);
 
   return (
@@ -59,6 +45,40 @@ function FilteredEventsPage() {
       <EventList items={filteredEvents} />
     </div>
   );
+}
+
+export async function getServerSideProps(context) {
+  const filteredData = context.params.slug;
+
+  const numYear = +filteredData[0];
+  const numMonth = +filteredData[1];
+
+  if (
+    isNaN(numYear) ||
+    isNaN(numMonth) ||
+    numYear > 2030 ||
+    numYear < 2019 ||
+    numMonth < 1 ||
+    numMonth > 12
+  ) {
+    return {
+      props: {
+        hasError: true
+      }
+    };
+  }
+
+  const filteredEvents = await getFilteredEvents({ year: numYear, month: numMonth });
+
+  return {
+    props: {
+      events: filteredEvents,
+      date: {
+        year: numYear,
+        month: numMonth
+      }
+    }
+  };
 }
 
 export default FilteredEventsPage;
