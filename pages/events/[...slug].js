@@ -5,6 +5,7 @@ import ResultsTitle from "../../components/results-title/results-title";
 import Button from "../../components/ui/button";
 import ErrorAlert from "../../components/ui/error-alert/error-alert";
 import { useEffect, useState } from "react";
+import Head from "next/head";
 
 function FilteredEventsPage(props) {
   const [loadedEvents, setLoadedEvents] = useState();
@@ -31,12 +32,29 @@ function FilteredEventsPage(props) {
     }
   }, [data]);
 
+  let pageHeadData = (
+    <Head>
+      <title>Filtered Events</title>
+      <meta name="description" content={`Filtered events page`} />
+    </Head>
+  );
+
   if (!loadedEvents) {
     return <p className="center">Loading....</p>;
   }
 
   const numYear = +filteredData[0];
   const numMonth = +filteredData[1];
+
+  pageHeadData = (
+    <Head>
+      <title>Filtered Events </title>
+      <meta
+        name="description"
+        content={`All events for ${numMonth}/${numYear}`}
+      />
+    </Head>
+  );
 
   if (
     isNaN(numYear) ||
@@ -65,10 +83,13 @@ function FilteredEventsPage(props) {
   const filteredDateObject = new Date(numYear, numMonth - 1);
 
   return (
-    <div>
-      <ResultsTitle date={filteredDateObject} />
-      <EventList items={filteredEvents} />
-    </div>
+    <>
+      {pageHeadData}
+      <div>
+        <ResultsTitle date={filteredDateObject} />
+        <EventList items={filteredEvents} />
+      </div>
+    </>
   );
 }
 
