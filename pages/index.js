@@ -1,5 +1,6 @@
 import Head from "next/head";
 import EventList from "../components/events/event-list";
+import NewsletterRegistration from "../components/input/newsletter-registration";
 import { getFeaturedEvents } from "../helpers/api-utils";
 
 function HomePage(props) {
@@ -12,6 +13,7 @@ function HomePage(props) {
           content="Find great events that make you evolve"
         />
       </Head>
+      <NewsletterRegistration />
       <EventList items={props.events} />
     </>
   );
